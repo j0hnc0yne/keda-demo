@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: keda-demo-servicemonitor
+  namespace: observability
+  labels:
+    release: kube-prom-stack # Label to allow Prometheus to discover this ServiceMonitor
+spec:
+  selector:
+    matchLabels:
+      app: keda-demo # Matches the 'app' label on Kubernetes Service
+  endpoints:
+  - port: http # Name of the port defined in your Service
+    path: /actuator/prometheus # Path to the metrics endpoint
+    interval: 10s # Scrape interval
+  namespaceSelector:
+    matchNames:
+    - default # Or the namespace where your service resides

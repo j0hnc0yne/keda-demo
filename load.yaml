@@ -1,0 +1,19 @@
+config:
+  target: http://localhost:8080
+  phases:
+    - duration: 120
+      arrivalRate: 1
+      rampTo: 5
+      name: Warm up phase
+    - duration: 120
+      arrivalRate: 5
+      rampTo: 10
+      name: Ramp up load
+    - duration: 120
+      arrivalRate: 10
+      rampTo: 20
+      name: Spike phase
+scenarios:
+  - flow:
+      - get:
+          url: "/test"
