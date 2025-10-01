@@ -17,11 +17,8 @@ fi
 ./gradlew clean bootJar
 
 podman build --tag=${image_name}:${version} --file=./Containerfile .
-#  --build-arg=GIT_COMMIT=$(git rev-parse HEAD) \
-#  --build-arg=GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD) \
-#  --build-arg=GIT_TAG=$(git describe --tags --abbrev=0) \
 
-registryHost=$(multipass list | grep microk8s | awk '{print $3}')
+registryHost=$(microk8s kubectl get node microk8s-vm -o jsonpath='{.status.addresses[0].address}')
 
 podman tag ${image_name}:${version} ${registryHost}:32000/${image_name}:${version}
 podman push ${registryHost}:32000/${image_name}:${version}
