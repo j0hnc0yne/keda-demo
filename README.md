@@ -86,11 +86,30 @@ microk8s kubectl apply -f k8s/monitoring.yaml -n observability
 microk8s kubectl port-forward  -n observability service/kube-prom-stack-kube-prome-prometheus 9090:9090
 ```
 
-6. Then load [http://localhost:9090](http://localhost:9090) and browse to the 'Graph' tab and enter the following query:
+6. Then load [http://localhost:9090](http://localhost:9090) and browse to the 'Graph' tab and enter the below query. Hit the `/test` endpoint a few more times to make sure it's tracking the metrics
 ```promql
 sum(rate(http_server_requests_seconds_count{uri='/test'}[1m]))
 ```
 
+7. Next, apply the KEDA ScaledObject
+
+```bash
+microk8s kubectl apply -f k8s/scale-config.yaml
+```
+
+8. Ensure that the HPA was created by KEDA:
+
+```bash
+➜  microk8s kubectl get hpa
+NAME                              REFERENCE              TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+keda-hpa-keda-demo-scaledobject   Deployment/keda-demo   99m/5 (avg)   1         5         1          80s
+```
+
+8. Ensure that [Artillery](https://www.artillery.io/docs/get-started/get-artillery) is installed, and then run the load test
+
+```bash
+./load-test.sh
+```
 
 ## Other Tidbits
 
@@ -99,3 +118,8 @@ To View the MicroK8s Web-UI, use the following commands
 ```bash
 microk8s dashboard-proxy
 ```
+
+To setup [K9s](https://k9scli.io/) to view microk8s cluster
+
+1. `brew install derailed/k9s/k9s`
+2. `microk8s kubectl config view --raw > $HOME/.kube/config`
