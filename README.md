@@ -20,16 +20,16 @@ The demo setup below will walk through the steps of how you can run this on your
     ```bash
     microk8s enable registry
     ```
-  b. Next determine the IP address of the node, by running the following and grabbing the Internal IP
+   b. Next determine the IP address of the node, by running the following and grabbing the Internal IP
 
-```bash
-microk8s kubectl get nodes -o wide
+    ```bash
+    microk8s kubectl get nodes -o wide
 
-NAME          STATUS   ROLES    AGE   VERSION    INTERNAL-IP    EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION       CONTAINER-RUNTIME
-microk8s-vm   Ready    <none>   8d    v1.28.15   192.168.64.3   <none>        Ubuntu 22.04.5 LTS   5.15.0-156-generic   containerd://1.6.28
-```
+    NAME          STATUS   ROLES    AGE   VERSION    INTERNAL-IP    EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION       CONTAINER-RUNTIME
+    microk8s-vm   Ready    <none>   8d    v1.28.15   192.168.64.3   <none>        Ubuntu 22.04.5 LTS   5.15.0-156-generic   containerd://1.6.28
+    ```
 
-  c. Now, setup podman to enable pushing to the registry running at the IP address from the prior step at port 32000
+   c. Now, setup podman to enable pushing to the registry running at the IP address from the prior step at port 32000
 
     ```bash
     ➜  podman machine ssh --username root
@@ -46,8 +46,7 @@ microk8s-vm   Ready    <none>   8d    v1.28.15   192.168.64.3   <none>        Ub
     insecure = true
     ```
 
-  d. Then stop / start the podman machine
-
+   d. Then stop / start the podman machine
 
 
 ## Running the Demo
