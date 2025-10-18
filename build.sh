@@ -20,5 +20,7 @@ podman build --tag=${image_name}:${version} --file=./Containerfile .
 
 registryHost=$(microk8s kubectl get node microk8s-vm -o jsonpath='{.status.addresses[0].address}')
 
+echo "Tagging image for registry at ${registryHost}:32000"
 podman tag ${image_name}:${version} ${registryHost}:32000/${image_name}:${version}
+echo "Pushing image to registry at ${registryHost}:32000"
 podman push ${registryHost}:32000/${image_name}:${version}
