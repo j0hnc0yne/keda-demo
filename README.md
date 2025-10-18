@@ -8,9 +8,9 @@ The demo setup below will walk through the steps of how you can run this on your
 ## Setup
 
 1. Install & Setup [MicroK8s](https://microk8s.io/#install-microk8s)
-2. Enable Prometheus
+2. Enable observability if not already enabled
    ```bash
-   microk8s enable prometheus
+   microk8s enable observability
    ```
 3. Install [KEDA](https://keda.sh/docs/2.17/deploy/#installing-3) on the MicroK8s cluster
 4. MicroK8s has a local container registry that can be enabled and you can push to it from a local container build.  
@@ -62,12 +62,12 @@ microk8s-vm   Ready    <none>   8d    v1.28.15   192.168.64.3   <none>        Ub
 microk8s kubectl apply -f k8s/app.yaml
 ```
 
-3. To simplify the demo, we won't bother with Ingress and just use port forwarding to the Service, you can it out at this point.
+3. To simplify the demo, we won't bother with Ingress and just use port forwarding to the Service, you can test it out at this point.
    a. In one terminal window, use port-forward
     ```bash
     microk8s kubectl port-forward service/keda-demo-service 8080:8080
     ```
-  b. In another, test it out (or load in browser)
+  b. In another terminal window, test it out (or load in browser - [http://localhost:8080/test](http://localhost:8080/test))
     ```bash
     ➜  curl http://localhost:8080/test
     🚀
