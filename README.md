@@ -62,11 +62,13 @@ microk8s kubectl apply -f k8s/app.yaml
 ```
 
 3. To simplify the demo, we won't bother with Ingress and just use port forwarding to the Service, you can test it out at this point.
+
    a. In one terminal window, use port-forward
     ```bash
     microk8s kubectl port-forward service/keda-demo-service 8080:8080
     ```
-  b. In another terminal window, test it out (or load in browser - [http://localhost:8080/test](http://localhost:8080/test))
+    
+   b. In another terminal window, test it out (or load in browser - [http://localhost:8080/test](http://localhost:8080/test))
     ```bash
     ➜  curl http://localhost:8080/test
     🚀
@@ -87,9 +89,9 @@ microk8s kubectl port-forward  -n observability service/kube-prom-stack-kube-pro
 6. Then load [http://localhost:9090](http://localhost:9090)
 
 
+## Other Tidbits
 
-
-To View the MicroK8s Web-UI
+To View the MicroK8s Web-UI, use the following commands
 
 ```bash
 microk8s dashboard-proxy
