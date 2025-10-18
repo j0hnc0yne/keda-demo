@@ -86,7 +86,10 @@ microk8s kubectl apply -f k8s/monitoring.yaml -n observability
 microk8s kubectl port-forward  -n observability service/kube-prom-stack-kube-prome-prometheus 9090:9090
 ```
 
-6. Then load [http://localhost:9090](http://localhost:9090)
+6. Then load [http://localhost:9090](http://localhost:9090) and browse to the 'Graph' tab and enter the following query:
+```promql
+sum(rate(http_server_requests_seconds_count{uri='/test'}[1m]))
+```
 
 
 ## Other Tidbits
