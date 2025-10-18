@@ -13,4 +13,13 @@ spec:
            serverAddress: http://kube-prom-stack-kube-prome-prometheus.observability.svc.cluster.local:9090
            metricName: http_server_requests_seconds_count
            threshold: '5'
-           query: sum(rate(http_server_requests_seconds_count[1m]))
+           query: sum(rate(http_server_requests_seconds_count{service='keda-demo-service', uri='/test'}[30s]))
+   advanced:
+      horizontalPodAutoscalerConfig:
+         behavior:
+            scaleDown:
+               stabilizationWindowSeconds: 30
+               policies:
+                  -  type: Pods
+                     value: 1
+                     periodSeconds: 15

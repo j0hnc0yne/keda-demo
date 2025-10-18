@@ -88,7 +88,7 @@ microk8s kubectl port-forward  -n observability service/kube-prom-stack-kube-pro
 
 6. Then load [http://localhost:9090](http://localhost:9090) and browse to the 'Graph' tab and enter the below query. Hit the `/test` endpoint a few more times to make sure it's tracking the metrics
 ```promql
-sum(rate(http_server_requests_seconds_count{job='keda-demo-service', uri='/test'}[1m]))
+sum(rate(http_server_requests_seconds_count{service='keda-demo-service', uri='/test'}[30s]))
 ```
 
 7. Next, apply the KEDA ScaledObject
