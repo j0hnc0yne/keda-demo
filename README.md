@@ -88,7 +88,7 @@ microk8s kubectl port-forward  -n observability service/kube-prom-stack-kube-pro
 
 6. Then load [http://localhost:9090](http://localhost:9090) and browse to the 'Graph' tab and enter the below query. Hit the `/test` endpoint a few more times to make sure it's tracking the metrics
 ```promql
-sum(rate(http_server_requests_seconds_count{uri='/test'}[1m]))
+sum(rate(http_server_requests_seconds_count{job='keda-demo-service', uri='/test'}[1m]))
 ```
 
 7. Next, apply the KEDA ScaledObject
@@ -110,6 +110,8 @@ keda-hpa-keda-demo-scaledobject   Deployment/keda-demo   99m/5 (avg)   1        
 ```bash
 ./load-test.sh
 ```
+
+9. Monitor the load and HPA/pods scaling up
 
 ## Other Tidbits
 
