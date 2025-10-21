@@ -11,7 +11,6 @@ spec:
       - type: prometheus
         metadata:
            serverAddress: http://kube-prom-stack-kube-prome-prometheus.observability.svc.cluster.local:9090
-           metricName: http_server_requests_seconds_count
            threshold: '5'
            query: sum(rate(http_server_requests_seconds_count{service='keda-demo-service', uri='/test'}[30s]))
    advanced:
