@@ -14,7 +14,7 @@ spec:
       spec:
          containers:
          - name: keda-demo
-           image: localhost:32000/keda-demo:latest # microk8s local registry
+           image: localhost:32000/keda-demo:0.1.0 # microk8s local registry
            ports:
               - containerPort: 8080
 ---

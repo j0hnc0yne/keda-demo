@@ -1,4 +1,4 @@
-FROM amazoncorretto:21-alpine
+FROM amazoncorretto:25-alpine
 
 # Metadata as a label
 LABEL maintainer="john.coyne@gmail.com" version="1.0" description="Demo app for KEDA"

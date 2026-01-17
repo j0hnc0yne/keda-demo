@@ -5,8 +5,8 @@ plugins {
 }
 
 group = 'com.demo'
-version = '0.1.0-SNAPSHOT'
-description = 'Demo project for Spring Boot'
+version = '0.1.0'
+description = 'Demo project for KEDA'
 
 java {
 	toolchain {
@@ -33,4 +33,8 @@ tasks.named('test') {
 
 tasks.named('bootJar') {
 	archiveClassifier.set('boot')
+}
+
+springBoot {
+	buildInfo()
 }

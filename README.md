@@ -8,6 +8,20 @@ The demo setup below will walk through the steps of how you can run this on your
 ## Setup
 
 1. Install & Setup [MicroK8s](https://microk8s.io/#install-microk8s)
+   - If required, update the version of Kubernetes, when I installed using the above directions, the version was older (1.28)
+   - First access the Ubuntu VM
+     ```bash
+      multipass shell microk8s-vm
+      ```
+   - Then within the VM, use the following command to update Kubernetes, going one version at a time until reaching the desired version
+      ```bash
+      sudo snap refresh microk8s --channel=1.29/stable
+      ```
+2. Enable metallb
+   ```bash
+   microk8s enable metallb
+   ```
+
 2. Enable observability if not already enabled
    ```bash
    microk8s enable observability
@@ -47,6 +61,14 @@ The demo setup below will walk through the steps of how you can run this on your
     ```
 
    d. Then stop / start the podman machine
+
+5. (OPTIONAL) Add the HTTP Add On to scale to/from zero
+   a. 
+
+   ```bash
+   helm install http-add-on kedacore/keda-add-ons-http --namespace keda \
+   --set scaler.replicas=1 --set interceptor.replicas.min=1
+   ```
 
 
 ## Running the Demo
