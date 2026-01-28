@@ -147,3 +147,8 @@ To setup [K9s](https://k9scli.io/) to view microk8s cluster
 
 1. `brew install derailed/k9s/k9s`
 2. `microk8s kubectl config view --raw > $HOME/.kube/config`
+
+
+### Spring Documentation
+
+* [HTTP Server Requests Observation](https://docs.spring.io/spring-framework/reference/integration/observability.html#observability.config.conventions)
