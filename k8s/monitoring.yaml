@@ -2,9 +2,9 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: keda-demo-servicemonitor
-  namespace: observability
+  namespace: monitoring
   labels:
-    release: kube-prom-stack # Label to allow Prometheus to discover this ServiceMonitor
+    release: prometheus # Label to allow Prometheus to discover this ServiceMonitor
 spec:
   selector:
     matchLabels:

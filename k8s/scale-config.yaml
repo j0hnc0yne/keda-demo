@@ -10,7 +10,7 @@ spec:
    triggers:
       - type: prometheus
         metadata:
-           serverAddress: http://kube-prom-stack-kube-prome-prometheus.observability.svc.cluster.local:9090
+           serverAddress: http://monitoring-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
            threshold: '10'
            query: sum(rate(account_processing_seconds_count{service='keda-demo-service'}[30s]))
    advanced:
@@ -21,4 +21,4 @@ spec:
                policies:
                   -  type: Pods
                      value: 1
-                     periodSeconds: 10
+                     periodSeconds: 15

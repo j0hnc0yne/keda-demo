@@ -1,9 +1,8 @@
 #!/bin/bash
 set -euo pipefail
-# Build mock image using podman
-# Usage: ./scripts/build-mock-image.sh
 
 image_name=keda-demo
+registryHost=localhost:5001
 
 # Check if version is set in environment variable APP_VERSION
 if [ -z "${APP_VERSION:-}" ]; then
@@ -17,12 +16,10 @@ echo "Building with version [${version}]"
 
 ./gradlew clean bootJar
 
-echo "Building image ${image_name}:${version} using podman"
-podman build --tag=${image_name}:${version} --file=./Containerfile .
+echo "Building image ${image_name}:${version} using docker"
+docker build --tag=${image_name}:${version} --file=./Containerfile .
 
-registryHost=$(microk8s kubectl get node microk8s-vm -o jsonpath='{.status.addresses[0].address}')
-
-echo "Tagging image for registry at ${registryHost}:32000"
-podman tag ${image_name}:${version} ${registryHost}:32000/${image_name}:${version}
-echo "Pushing image to registry at ${registryHost}:32000"
-podman push ${registryHost}:32000/${image_name}:${version}
+echo "Tagging image for registry at ${registryHost}"
+docker tag ${image_name}:${version} ${registryHost}/${image_name}:${version}
+echo "Pushing image to registry at ${registryHost}"
+docker push ${registryHost}/${image_name}:${version}

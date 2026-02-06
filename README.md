@@ -2,74 +2,39 @@
 
 This demo project is meant to showcase using [KEDA](https://keda.sh/) to perform autoscaling of a Spring Boot application using [Micrometer](https://micrometer.io/) exposing HTTP metrics using the [Micrometer Prometheus](https://docs.micrometer.io/micrometer/reference/implementations/prometheus.html) library by using the KEDA [Prometheus Scaler](https://keda.sh/docs/2.17/scalers/prometheus/).
 
-The demo setup below will walk through the steps of how you can run this on your laptop using [MicroK8s](https://microk8s.io/), a lightweight Kubernetes distribution. I used [Podman](https://podman.io/) for building a container image, but you could also use Docker.
+The demo setup below will walk through the steps of how you can run this on your laptop using [kind](https://kind.sigs.k8s.io/), a tool for running local Kubernetes clusters using Docker.
 
 
 ## Setup
 
-1. Install & Setup [MicroK8s](https://microk8s.io/#install-microk8s)
-   - If required, update the version of Kubernetes, when I installed using the above directions, the version was older (1.28)
-   - First access the Ubuntu VM
-     ```bash
-      multipass shell microk8s-vm
-      ```
-   - Then within the VM, use the following command to update Kubernetes, going one version at a time until reaching the desired version
-      ```bash
-      sudo snap refresh microk8s --channel=1.29/stable
-      ```
-2. Enable metallb
+Prerequisite: Docker is already installed.
+
+1. Install & Setup [kind](https://kind.sigs.k8s.io/docs/user/quick-start/), `kubectl`, and `helm`
    ```bash
-   microk8s enable metallb
+   brew install kind kubectl helm
    ```
-
-2. Enable observability if not already enabled
+2. Setup kind with a local container registry, script in repo
    ```bash
-   microk8s enable observability
+   ./kind-setup-with-registry.sh
    ```
-3. Install [KEDA](https://keda.sh/docs/2.17/deploy/#installing-3) on the MicroK8s cluster
-4. MicroK8s has a local container registry that can be enabled and you can push to it from a local container build.  
-
-   a. First ensure the registry is enabled:
-
-    ```bash
-    microk8s enable registry
-    ```
-   b. Next determine the IP address of the node, by running the following and grabbing the Internal IP
-
-    ```bash
-    microk8s kubectl get nodes -o wide
-
-    NAME          STATUS   ROLES    AGE   VERSION    INTERNAL-IP    EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION       CONTAINER-RUNTIME
-    microk8s-vm   Ready    <none>   8d    v1.28.15   192.168.64.3   <none>        Ubuntu 22.04.5 LTS   5.15.0-156-generic   containerd://1.6.28
-    ```
-
-   c. Now, setup podman to enable pushing to the registry running at the IP address from the prior step at port 32000
-
-    ```bash
-    ➜  podman machine ssh --username root
-    Connecting to vm podman-machine-default. To close connection, use `~.` or `exit`
-
-    root@localhost:~# vi /etc/containers/registries.conf
-    ```
-
-    Add the following entry (replace IP address appropriately)
-
-    ```conf
-    [[registry]]
-    location = "192.168.64.3:32000"
-    insecure = true
-    ```
-
-   d. Then stop / start the podman machine
-
-5. (OPTIONAL) Add the HTTP Add On to scale to/from zero
-   a. 
-
+3. Install Prometheus via [community helm charts](https://github.com/prometheus-community/helm-charts?tab=readme-ov-file#prometheus-community-kubernetes-helm-charts)
    ```bash
-   helm install http-add-on kedacore/keda-add-ons-http --namespace keda \
-   --set scaler.replicas=1 --set interceptor.replicas.min=1
-   ```
+   helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+   helm repo update
+   # Create the namespace
+   kubectl create namespace monitoring
 
+   helm install monitoring prometheus-community/kube-prometheus-stack \
+   --namespace monitoring \
+   --set prometheus.prometheusSpec.podMonitorSelectorNilUsesHelmValues=false \
+   --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
+   ```
+4. Install [KEDA](https://keda.sh/docs/2.18/deploy/#installing) 
+   ```bash
+   helm repo add kedacore https://kedacore.github.io/charts  
+   helm repo update
+   helm install keda kedacore/keda --namespace keda --create-namespace
+   ```
 
 ## Running the Demo
 
@@ -78,34 +43,34 @@ The demo setup below will walk through the steps of how you can run this on your
 ./build.sh
 ```
 
-2. Deploy the application to the MicroK8s cluster
+2. Deploy the application to the kind cluster
 ```bash
-microk8s kubectl apply -f k8s/app.yaml
+kubectl apply -f k8s/app.yaml
 ```
 
 3. To simplify the demo, we won't bother with Ingress and just use port forwarding to the Service, you can test it out at this point.
 
    a. In one terminal window, use port-forward
     ```bash
-    microk8s kubectl port-forward service/keda-demo-service 8080:8080
+   kubectl port-forward service/keda-demo-service 8080:8080
     ```
     
    b. In another terminal window, test it out (or load in browser - [http://localhost:8080/test](http://localhost:8080/test))
     ```bash
-    ➜  curl http://localhost:8080/test
-    🚀
+    ➜  curl http://localhost:8080/customer/12345/accounts
+    {"customerId":12345,"accounts":[{"account":{"accountId":"12345000","accountType":"C"}}]}
     ``` 
 
-4. Next, deploy the [ServiceMonitor](https://doc.crds.dev/github.com/prometheus-operator/kube-prometheus/monitoring.coreos.com/ServiceMonitor/v1@v0.7.0) Custom Resource to the `observability` namespace, which will provide details to Prometheus on how to collect metrics from the application.
+4. Next, deploy the [ServiceMonitor](https://doc.crds.dev/github.com/prometheus-operator/kube-prometheus/monitoring.coreos.com/ServiceMonitor/v1@v0.7.0) Custom Resource to the `monitoring` namespace, which will provide details to Prometheus on how to collect metrics from the application.
 
 ```bash
-microk8s kubectl apply -f k8s/monitoring.yaml -n observability
+kubectl apply -f k8s/monitoring.yaml -n monitoring
 ```
 
 5. Check in Prometheus for the new metrics, first setup port-fowarding 
 
 ```bash
-microk8s kubectl port-forward  -n observability service/kube-prom-stack-kube-prome-prometheus 9090:9090
+kubectl port-forward  -n monitoring service/monitoring-kube-prometheus-prometheus 9090:9090
 ```
 
 6. Then load [http://localhost:9090](http://localhost:9090) and browse to the 'Graph' tab and enter the below query. Hit the `/test` endpoint a few more times to make sure it's tracking the metrics
@@ -116,15 +81,15 @@ sum(rate(http_server_requests_seconds_count{service='keda-demo-service', uri='/t
 7. Next, apply the KEDA ScaledObject
 
 ```bash
-microk8s kubectl apply -f k8s/scale-config.yaml
+kubectl apply -f k8s/scale-config.yaml
 ```
 
 8. Ensure that the HPA was created by KEDA:
 
 ```bash
-➜  microk8s kubectl get hpa
-NAME                              REFERENCE              TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
-keda-hpa-keda-demo-scaledobject   Deployment/keda-demo   99m/5 (avg)   1         5         1          80s
+➜  kubectl get hpa
+NAME                              REFERENCE              TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+keda-hpa-keda-demo-scaledobject   Deployment/keda-demo   <unknown>/10 (avg)   1         6         0          6s
 ```
 
 8. Ensure that [Artillery](https://www.artillery.io/docs/get-started/get-artillery) is installed, and then run the load test
@@ -137,17 +102,9 @@ keda-hpa-keda-demo-scaledobject   Deployment/keda-demo   99m/5 (avg)   1        
 
 ## Other Tidbits
 
-To View the MicroK8s Web-UI, use the following commands
-
-```bash
-microk8s dashboard-proxy
-```
-
-To setup [K9s](https://k9scli.io/) to view microk8s cluster
+To setup [K9s](https://k9scli.io/) to view kind cluster
 
 1. `brew install derailed/k9s/k9s`
-2. `microk8s kubectl config view --raw > $HOME/.kube/config`
-
 
 ### Spring Documentation
 
