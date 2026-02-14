@@ -7,8 +7,10 @@ spec:
       name: keda-demo
    minReplicaCount: 1
    maxReplicaCount: 6
+   pollingInterval: 86400
    triggers:
       - type: prometheus
+        useCachedMetrics: false # false is default
         metadata:
            serverAddress: http://monitoring-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
            threshold: '10'
